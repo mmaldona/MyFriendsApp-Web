@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { ArrowLeft, Image, User, Plus } from "lucide-react";
 import { useAppStore } from "../state/appStore";
 
@@ -7,7 +7,6 @@ const PHONE_LABELS = ["Mobile", "Home", "Work", "Other"];
 
 export default function EditPersonPage() {
   const { personId } = useParams<{ personId: string }>();
-  const navigate = useNavigate();
   const people = useAppStore((s) => s.people);
   const updatePerson = useAppStore((s) => s.updatePerson);
   const addNoteToHistory = useAppStore((s) => s.addNoteToHistory);
@@ -24,6 +23,7 @@ export default function EditPersonPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneLabel, setPhoneLabel] = useState("Mobile");
   const [customLabel, setCustomLabel] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (person) {
@@ -43,7 +43,8 @@ export default function EditPersonPage() {
   };
 
   const handleSave = () => {
-    if (!name.trim() || !person) return;
+    if (!name.trim() || !person || saving) return;
+    setSaving(true);
     updatePerson(person.id, {
       name: name.trim(),
       partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
@@ -56,7 +57,7 @@ export default function EditPersonPage() {
       const label = phoneLabel === "Other" && customLabel.trim() ? customLabel.trim() : phoneLabel;
       addPhoneNumber(person.id, phoneNumber.trim(), label);
     }
-    navigate(`/people/${person.id}`, { replace: true });
+    window.location.href = `/people/${person.id}`;
   };
 
   if (!person) {
@@ -68,7 +69,7 @@ export default function EditPersonPage() {
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10 flex items-center gap-3">
-          <button onClick={() => navigate(`/people/${personId}`)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
+          <button onClick={() => { window.location.href = `/people/${personId}`; }} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
             <ArrowLeft size={22} />
           </button>
           <h1 className="text-lg font-bold text-gray-900 flex-1">Edit Person</h1>
@@ -188,10 +189,10 @@ export default function EditPersonPage() {
 
           <button
             onClick={handleSave}
-            disabled={!name.trim()}
+            disabled={!name.trim() || saving}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white py-4 rounded-xl text-base font-semibold transition-colors"
           >
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
