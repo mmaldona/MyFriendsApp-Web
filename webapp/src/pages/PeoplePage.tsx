@@ -184,25 +184,32 @@ export default function PeoplePage() {
           ) : (
             <div className="grid grid-cols-2 gap-3">
               {people.map((person) => (
-                <button
-                  key={person.id}
-                  onClick={() => navigate(`/people/${person.id}`)}
-                  className="bg-white rounded-2xl border border-gray-200 shadow-sm p-4 text-center hover:shadow-md transition-shadow"
-                >
-                  <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3">
-                    {person.photoBase64 || person.photoUri ? (
-                      <img src={person.photoBase64 || person.photoUri} className="w-full h-full object-cover" alt="" />
-                    ) : (
-                      <span className="text-gray-500 font-bold text-xl">{person.name.charAt(0).toUpperCase()}</span>
+                <div key={person.id} className="relative bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
+                  <button
+                    onClick={() => navigate(`/people/${person.id}`)}
+                    className="w-full p-4 text-center"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3">
+                      {person.photoBase64 || person.photoUri ? (
+                        <img src={person.photoBase64 || person.photoUri} className="w-full h-full object-cover" alt="" />
+                      ) : (
+                        <span className="text-gray-500 font-bold text-xl">{person.name.charAt(0).toUpperCase()}</span>
+                      )}
+                    </div>
+                    <p className="font-semibold text-gray-900 text-sm leading-tight">
+                      {formatPersonName(person.name, person.partnerName)}
+                    </p>
+                    {person.noteHistory?.length > 0 && (
+                      <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[0].content}</p>
                     )}
-                  </div>
-                  <p className="font-semibold text-gray-900 text-sm leading-tight">
-                    {formatPersonName(person.name, person.partnerName)}
-                  </p>
-                  {person.noteHistory?.length > 0 && (
-                    <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[0].content}</p>
-                  )}
-                </button>
+                  </button>
+                  <button
+                    onClick={() => setDeleteConfirmId(person.id)}
+                    className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors"
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
               ))}
             </div>
           )}

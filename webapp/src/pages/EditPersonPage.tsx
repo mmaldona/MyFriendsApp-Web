@@ -72,13 +72,6 @@ export default function EditPersonPage() {
             <ArrowLeft size={22} />
           </button>
           <h1 className="text-lg font-bold text-gray-900 flex-1">Edit Person</h1>
-          <button
-            onClick={handleSave}
-            disabled={!name.trim()}
-            className="bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white px-5 py-2 rounded-xl text-sm font-semibold transition-colors"
-          >
-            Save
-          </button>
         </div>
 
         <div className="p-6 space-y-5">
