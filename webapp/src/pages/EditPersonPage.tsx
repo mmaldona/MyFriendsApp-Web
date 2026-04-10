@@ -56,7 +56,7 @@ export default function EditPersonPage() {
       const label = phoneLabel === "Other" && customLabel.trim() ? customLabel.trim() : phoneLabel;
       addPhoneNumber(person.id, phoneNumber.trim(), label);
     }
-    navigate(-1);
+    navigate(`/people/${person.id}`, { replace: true });
   };
 
   if (!person) {
@@ -68,7 +68,7 @@ export default function EditPersonPage() {
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10 flex items-center gap-3">
-          <button onClick={() => navigate(-1)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
+          <button onClick={() => navigate(`/people/${personId}`)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
             <ArrowLeft size={22} />
           </button>
           <h1 className="text-lg font-bold text-gray-900 flex-1">Edit Person</h1>
