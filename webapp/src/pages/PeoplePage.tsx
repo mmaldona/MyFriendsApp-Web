@@ -4,6 +4,7 @@ import { Search, Plus, Grid2X2, List, SlidersHorizontal, X, ArrowLeft, ArrowRigh
 import { useAppStore, ViewMode, SortMode } from "../state/appStore";
 import { formatPersonName } from "../utils/formatName";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from "@/components/ui/alert-dialog";
 
 function formatTimestamp(timestamp: number): string {
   const date = new Date(timestamp);
@@ -37,7 +38,7 @@ export default function PeoplePage() {
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
   const [moveSheetOpen, setMoveSheetOpen] = useState(false);
   const [selectedPersonToMove, setSelectedPersonToMove] = useState<string | null>(null);
-  const [pendingDeleteId, setPendingDeleteId] = useState<string | null>(null);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const group = allGroups.find((g) => g.id === groupId);
   const availableGroups = allGroups.filter((g) => g.id !== groupId && !g.deletedAt);
@@ -170,32 +171,13 @@ export default function PeoplePage() {
                           <ArrowRight size={16} />
                         </button>
                         <button
-                          onClick={() => setPendingDeleteId(pendingDeleteId === person.id ? null : person.id)}
-                          className={`p-2 rounded-xl transition-colors ${pendingDeleteId === person.id ? "bg-red-100 text-red-500" : "hover:bg-red-50 text-gray-400 hover:text-red-500"}`}
+                          onClick={() => setDeleteConfirmId(person.id)}
+                          className="p-2 rounded-xl hover:bg-red-50 text-gray-400 hover:text-red-500 transition-colors"
                         >
                           <X size={16} />
                         </button>
                       </div>
                     </div>
-                    {pendingDeleteId === person.id && (
-                      <div className="border-t border-red-100 bg-red-50 px-4 py-3 flex items-center justify-between">
-                        <span className="text-sm font-medium text-red-700">Delete {person.name}?</span>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => setPendingDeleteId(null)}
-                            className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-white border border-gray-200 text-gray-700 hover:bg-gray-50 transition-colors"
-                          >
-                            Cancel
-                          </button>
-                          <button
-                            onClick={() => { deletePerson(person.id); setPendingDeleteId(null); }}
-                            className="px-3 py-1.5 rounded-lg text-sm font-semibold bg-red-500 hover:bg-red-600 text-white transition-colors"
-                          >
-                            Delete
-                          </button>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </div>
               ))}
@@ -204,7 +186,7 @@ export default function PeoplePage() {
             <div className="grid grid-cols-2 gap-3">
               {people.map((person) => (
                 <div key={person.id} className="relative">
-                  <div className={`bg-white rounded-2xl border shadow-sm hover:shadow-md transition-shadow ${pendingDeleteId === person.id ? "border-red-300" : "border-gray-200"}`}>
+                  <div className="bg-white rounded-2xl border border-gray-200 shadow-sm hover:shadow-md transition-shadow">
                     <button onClick={() => navigate(`/people/${person.id}`)} className="w-full p-4 text-center">
                       <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center overflow-hidden mx-auto mb-3">
                         {(person.photoBase64 || person.photoUri) ? (
@@ -220,22 +202,12 @@ export default function PeoplePage() {
                         <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[0].content}</p>
                       )}
                     </button>
-                    {pendingDeleteId === person.id ? (
-                      <div className="absolute inset-0 bg-red-50 rounded-2xl flex flex-col items-center justify-center gap-2 p-3">
-                        <span className="text-sm font-semibold text-red-700 text-center">Delete {person.name}?</span>
-                        <div className="flex gap-2">
-                          <button onClick={() => setPendingDeleteId(null)} className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-white border border-gray-200 text-gray-700">Cancel</button>
-                          <button onClick={() => { deletePerson(person.id); setPendingDeleteId(null); }} className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-500 text-white">Delete</button>
-                        </div>
-                      </div>
-                    ) : (
-                      <button
-                        onClick={() => setPendingDeleteId(person.id)}
-                        className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors"
-                      >
-                        <X size={12} />
-                      </button>
-                    )}
+                    <button
+                      onClick={() => setDeleteConfirmId(person.id)}
+                      className="absolute top-2 right-2 w-6 h-6 rounded-full bg-gray-100 hover:bg-red-100 text-gray-400 hover:text-red-500 flex items-center justify-center transition-colors"
+                    >
+                      <X size={12} />
+                    </button>
                   </div>
                 </div>
               ))}
@@ -303,6 +275,29 @@ export default function PeoplePage() {
           )}
         </SheetContent>
       </Sheet>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => { if (!open) setDeleteConfirmId(null); }}>
+        <AlertDialogContent className="max-w-sm rounded-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Person</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              {deleteConfirmId ? people.find((p) => p.id === deleteConfirmId)?.name : "this person"}?
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => { if (deleteConfirmId) { deletePerson(deleteConfirmId); setDeleteConfirmId(null); } }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
