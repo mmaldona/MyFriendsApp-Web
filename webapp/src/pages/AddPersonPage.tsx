@@ -1,19 +1,20 @@
 import { useState, useRef } from "react";
-import { useParams } from "react-router-dom";
-import { ArrowLeft, Camera, Image, User } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Image, User } from "lucide-react";
 import { useAppStore } from "../state/appStore";
 
 export default function AddPersonPage() {
   const { groupId } = useParams<{ groupId: string }>();
+  const navigate = useNavigate();
   const addPerson = useAppStore((s) => s.addPerson);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const didSave = useRef(false);
 
   const [name, setName] = useState("");
   const [partnerName, setPartnerName] = useState("");
   const [hasPartner, setHasPartner] = useState(false);
   const [notes, setNotes] = useState("");
   const [photoBase64, setPhotoBase64] = useState<string | undefined>(undefined);
-  const [saving, setSaving] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -26,8 +27,8 @@ export default function AddPersonPage() {
   };
 
   const handleSave = () => {
-    if (!name.trim() || saving) return;
-    setSaving(true);
+    if (!name.trim() || didSave.current) return;
+    didSave.current = true;
     addPerson({
       name: name.trim(),
       partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
@@ -39,7 +40,7 @@ export default function AddPersonPage() {
       photoBase64,
       groupId: groupId!,
     });
-    window.location.href = `/groups/${groupId}`;
+    navigate(`/groups/${groupId}`);
   };
 
   return (
@@ -47,7 +48,7 @@ export default function AddPersonPage() {
       <div className="max-w-lg mx-auto">
         {/* Header */}
         <div className="bg-white px-4 py-4 border-b border-gray-200 sticky top-0 z-10 flex items-center gap-3">
-          <button onClick={() => { window.location.href = `/groups/${groupId}`; }} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
+          <button onClick={() => navigate(`/groups/${groupId}`)} className="p-2 rounded-xl hover:bg-gray-100 text-gray-600 transition-colors">
             <ArrowLeft size={22} />
           </button>
           <h1 className="text-lg font-bold text-gray-900 flex-1">Add Person</h1>
@@ -135,10 +136,10 @@ export default function AddPersonPage() {
 
           <button
             onClick={handleSave}
-            disabled={!name.trim() || saving}
+            disabled={!name.trim()}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white py-4 rounded-xl text-base font-semibold transition-colors"
           >
-            {saving ? "Saving..." : "Save Person"}
+            Save Person
           </button>
         </div>
       </div>
