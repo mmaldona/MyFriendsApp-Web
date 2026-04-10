@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { Search, Plus, Grid2X2, List, SlidersHorizontal, X, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useAppStore, ViewMode, SortMode } from "../state/appStore";
@@ -39,6 +39,10 @@ export default function PeoplePage() {
   const [moveSheetOpen, setMoveSheetOpen] = useState(false);
   const [selectedPersonToMove, setSelectedPersonToMove] = useState<string | null>(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
 
   const group = allGroups.find((g) => g.id === groupId);
   const availableGroups = allGroups.filter((g) => g.id !== groupId && !g.deletedAt);
