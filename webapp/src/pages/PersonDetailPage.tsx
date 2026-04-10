@@ -109,7 +109,7 @@ function PhoneCard({
             <p className="text-xs text-gray-500">{label}</p>
           </div>
           <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => setIsEditing(true)} className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors">
+            <button onClick={() => { setIsEditing(true); setEditedNumber(number); setEditedLabel(label); }} className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors">
               <Pencil size={14} />
             </button>
             <button onClick={onDelete} className="p-1.5 bg-red-100 hover:bg-red-200 text-red-500 rounded-lg transition-colors">
