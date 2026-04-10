@@ -15,32 +15,45 @@ export default function AddPersonPage() {
   const [hasPartner, setHasPartner] = useState(false);
   const [notes, setNotes] = useState("");
   const [photoBase64, setPhotoBase64] = useState<string | undefined>(undefined);
+  const [saving, setSaving] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      setPhotoBase64(ev.target?.result as string);
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const maxSize = 800;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      setPhotoBase64(canvas.toDataURL('image/jpeg', 0.8));
+      URL.revokeObjectURL(url);
     };
-    reader.readAsDataURL(file);
+    img.src = url;
   };
 
   const handleSave = () => {
     if (!name.trim() || didSave.current) return;
     didSave.current = true;
-    addPerson({
-      name: name.trim(),
-      partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
-      notes: notes.trim() || undefined,
-      noteHistory: notes.trim()
-        ? [{ id: Date.now().toString() + Math.random(), content: notes.trim(), timestamp: Date.now() }]
-        : [],
-      phoneNumbers: [],
-      photoBase64,
-      groupId: groupId!,
-    });
-    navigate(`/groups/${groupId}`);
+    setSaving(true);
+    setTimeout(() => {
+      addPerson({
+        name: name.trim(),
+        partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
+        notes: notes.trim() || undefined,
+        noteHistory: notes.trim()
+          ? [{ id: Date.now().toString() + Math.random(), content: notes.trim(), timestamp: Date.now() }]
+          : [],
+        phoneNumbers: [],
+        photoBase64,
+        groupId: groupId!,
+      });
+      navigate(`/groups/${groupId}`);
+    }, 10);
   };
 
   return (
@@ -136,10 +149,10 @@ export default function AddPersonPage() {
 
           <button
             onClick={handleSave}
-            disabled={!name.trim()}
+            disabled={!name.trim() || saving}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white py-4 rounded-xl text-base font-semibold transition-colors"
           >
-            Save Person
+            {saving ? "Saving..." : "Save Person"}
           </button>
         </div>
       </div>

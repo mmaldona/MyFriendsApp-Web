@@ -25,6 +25,7 @@ export default function EditPersonPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [phoneLabel, setPhoneLabel] = useState("Mobile");
   const [customLabel, setCustomLabel] = useState("");
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (person) {
@@ -38,27 +39,42 @@ export default function EditPersonPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (ev) => setPhotoBase64(ev.target?.result as string);
-    reader.readAsDataURL(file);
+    const img = new window.Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      const maxSize = 800;
+      const scale = Math.min(maxSize / img.width, maxSize / img.height, 1);
+      const canvas = document.createElement('canvas');
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      const ctx = canvas.getContext('2d')!;
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      setPhotoBase64(canvas.toDataURL('image/jpeg', 0.8));
+      URL.revokeObjectURL(url);
+    };
+    img.src = url;
   };
 
   const handleSave = () => {
     if (!name.trim() || !person || didSave.current) return;
     didSave.current = true;
-    updatePerson(person.id, {
-      name: name.trim(),
-      partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
-      photoBase64,
-    });
-    if (newNote.trim()) {
-      addNoteToHistory(person.id, newNote.trim());
-    }
-    if (phoneNumber.trim()) {
-      const label = phoneLabel === "Other" && customLabel.trim() ? customLabel.trim() : phoneLabel;
-      addPhoneNumber(person.id, phoneNumber.trim(), label);
-    }
-    navigate(`/people/${person.id}`);
+    setSaving(true);
+    setTimeout(() => {
+      updatePerson(person.id, {
+        name: name.trim(),
+        partnerName: hasPartner && partnerName.trim() ? partnerName.trim() : undefined,
+        photoBase64,
+        photoUri: undefined,
+      });
+      if (newNote.trim()) {
+        addNoteToHistory(person.id, newNote.trim());
+      }
+      if (phoneNumber.trim()) {
+        const label = phoneLabel === "Other" && customLabel.trim() ? customLabel.trim() : phoneLabel;
+        addPhoneNumber(person.id, phoneNumber.trim(), label);
+      }
+      navigate(`/people/${person.id}`);
+    }, 10);
   };
 
   if (!person) {
@@ -190,10 +206,10 @@ export default function EditPersonPage() {
 
           <button
             onClick={handleSave}
-            disabled={!name.trim()}
+            disabled={!name.trim() || saving}
             className="w-full bg-blue-500 hover:bg-blue-600 disabled:opacity-40 text-white py-4 rounded-xl text-base font-semibold transition-colors"
           >
-            Save Changes
+            {saving ? "Saving..." : "Save Changes"}
           </button>
         </div>
       </div>
