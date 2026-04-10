@@ -225,7 +225,7 @@ export default function PersonDetailPage() {
 
       {/* Delete Note Confirm */}
       <Dialog open={!!deleteNoteId} onOpenChange={() => setDeleteNoteId(null)}>
-        <DialogContent className="max-w-sm mx-4 rounded-2xl">
+        <DialogContent className="">
           <DialogHeader><DialogTitle>Delete Note</DialogTitle></DialogHeader>
           <p className="text-gray-600 text-sm">Are you sure you want to delete this note? This action cannot be undone.</p>
           <div className="flex gap-3 mt-2">
@@ -237,7 +237,7 @@ export default function PersonDetailPage() {
 
       {/* Delete Phone Confirm */}
       <Dialog open={!!deletePhoneId} onOpenChange={() => setDeletePhoneId(null)}>
-        <DialogContent className="max-w-sm mx-4 rounded-2xl">
+        <DialogContent className="">
           <DialogHeader><DialogTitle>Delete Phone Number</DialogTitle></DialogHeader>
           <p className="text-gray-600 text-sm">Are you sure you want to delete this phone number? This action cannot be undone.</p>
           <div className="flex gap-3 mt-2">

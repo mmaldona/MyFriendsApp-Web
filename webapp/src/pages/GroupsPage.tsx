@@ -202,7 +202,7 @@ export default function GroupsPage() {
 
       {/* Add Group Dialog */}
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
-        <DialogContent className="max-w-md mx-4 rounded-2xl">
+        <DialogContent className="">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold">New Group</DialogTitle>
           </DialogHeader>

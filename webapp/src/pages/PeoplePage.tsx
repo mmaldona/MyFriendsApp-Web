@@ -278,7 +278,7 @@ export default function PeoplePage() {
 
       {/* Delete Confirmation */}
       <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => { if (!open) setDeleteConfirmId(null); }}>
-        <AlertDialogContent className="max-w-sm rounded-2xl">
+        <AlertDialogContent className="">
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Person</AlertDialogTitle>
             <AlertDialogDescription>
