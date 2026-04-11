@@ -253,9 +253,7 @@ export default function GroupsPage() {
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Group</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete{" "}
-              {deleteConfirmId ? groups.find((g) => g.id === deleteConfirmId)?.name : "this group"}?
-              This cannot be undone.
+              Are you sure you want to delete {deleteConfirmId ? groups.find((g) => g.id === deleteConfirmId)?.name : "this group"}?
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
