@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { useNavigate, useParams, useSearchParams, useLocation } from "react-router-dom";
 import { Search, Plus, Grid2X2, List, SlidersHorizontal, X, ArrowLeft, ArrowRight, Check } from "lucide-react";
 import { useAppStore, ViewMode, SortMode } from "../state/appStore";
 import { formatPersonName } from "../utils/formatName";
@@ -23,6 +23,7 @@ export default function PeoplePage() {
   const [searchParams] = useSearchParams();
   const groupName = searchParams.get("name") || "Group";
   const navigate = useNavigate();
+  const location = useLocation();
 
   const allPeople = useAppStore((s) => s.people);
   const allGroups = useAppStore((s) => s.groups);
@@ -42,7 +43,7 @@ export default function PeoplePage() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-  }, []);
+  }, [location.key]);
 
   const group = allGroups.find((g) => g.id === groupId);
   const availableGroups = allGroups.filter((g) => g.id !== groupId && !g.deletedAt);
@@ -162,7 +163,7 @@ export default function PeoplePage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-900 truncate">{formatPersonName(person.name, person.partnerName)}</p>
                           {person.noteHistory?.length > 0 && (
-                            <p className="text-sm text-gray-500 truncate">{person.noteHistory[person.noteHistory.length - 1].content}</p>
+                            <p className="text-sm text-gray-500 truncate">{person.noteHistory[0].content}</p>
                           )}
                         </div>
                       </button>
@@ -203,7 +204,7 @@ export default function PeoplePage() {
                         {formatPersonName(person.name, person.partnerName)}
                       </p>
                       {person.noteHistory?.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[person.noteHistory.length - 1].content}</p>
+                        <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[0].content}</p>
                       )}
                     </button>
                     <button
