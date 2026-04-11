@@ -162,7 +162,7 @@ export default function PeoplePage() {
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-gray-900 truncate">{formatPersonName(person.name, person.partnerName)}</p>
                           {person.noteHistory?.length > 0 && (
-                            <p className="text-sm text-gray-500 truncate">{person.noteHistory[0].content}</p>
+                            <p className="text-sm text-gray-500 truncate">{person.noteHistory[person.noteHistory.length - 1].content}</p>
                           )}
                         </div>
                       </button>
@@ -203,7 +203,7 @@ export default function PeoplePage() {
                         {formatPersonName(person.name, person.partnerName)}
                       </p>
                       {person.noteHistory?.length > 0 && (
-                        <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[0].content}</p>
+                        <p className="text-xs text-gray-500 mt-1 truncate">{person.noteHistory[person.noteHistory.length - 1].content}</p>
                       )}
                     </button>
                     <button
