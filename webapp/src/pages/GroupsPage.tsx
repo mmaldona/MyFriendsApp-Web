@@ -19,6 +19,7 @@ import { Users, Plus, Trash2, GripVertical, Pencil, X, Check } from "lucide-reac
 import { useAppStore } from "../state/appStore";
 import { Group } from "../types/app";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
@@ -111,6 +112,7 @@ export default function GroupsPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedColor, setSelectedColor] = useState(GROUP_COLORS[0]);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   const groups = allGroups
     .filter((g) => !g.deletedAt)
@@ -183,7 +185,7 @@ export default function GroupsPage() {
                     peopleCount={getPeopleCount(group.id)}
                     onPress={() => navigate(`/groups/${group.id}?name=${encodeURIComponent(group.name)}`)}
                     onEdit={() => navigate(`/groups/${group.id}/edit`)}
-                    onDelete={() => deleteGroup(group.id)}
+                    onDelete={() => setDeleteConfirmId(group.id)}
                   />
                 ))}
               </SortableContext>
@@ -244,6 +246,29 @@ export default function GroupsPage() {
           </Button>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Confirmation */}
+      <AlertDialog open={!!deleteConfirmId} onOpenChange={(open) => { if (!open) setDeleteConfirmId(null); }}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Group</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete{" "}
+              {deleteConfirmId ? groups.find((g) => g.id === deleteConfirmId)?.name : "this group"}?
+              This cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setDeleteConfirmId(null)}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-500 hover:bg-red-600 text-white"
+              onClick={() => { if (deleteConfirmId) { deleteGroup(deleteConfirmId); setDeleteConfirmId(null); } }}
+            >
+              Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
