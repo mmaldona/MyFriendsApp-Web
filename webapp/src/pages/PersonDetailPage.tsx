@@ -1,9 +1,10 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2, Phone, FileText, Plus } from "lucide-react";
 import { useAppStore } from "../state/appStore";
 import { formatPersonName, formatTimestamp } from "../utils/formatName";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { PhoneNumber } from "../types/app";
 
 function NoteCard({
   noteId,
@@ -64,68 +65,58 @@ function NoteCard({
   );
 }
 
-function PhoneCard({
-  phoneId,
-  number,
-  label,
-  onDelete,
+function EditPhoneDialog({
+  phone,
+  personId,
+  onClose,
 }: {
-  phoneId: string;
-  number: string;
-  label: string;
-  onDelete: () => void;
+  phone: PhoneNumber;
+  personId: string;
+  onClose: () => void;
 }) {
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedNumber, setEditedNumber] = useState(number);
-  const [editedLabel, setEditedLabel] = useState(label);
+  const [editedNumber, setEditedNumber] = useState(phone.number);
+  const [editedLabel, setEditedLabel] = useState(phone.label);
   const editPhoneNumber = useAppStore((s) => s.editPhoneNumber);
-
-  useEffect(() => {
-    if (!isEditing) {
-      setEditedNumber(number);
-      setEditedLabel(label);
-    }
-  }, [number, label]);
-  const { personId } = useParams<{ personId: string }>();
 
   const handleSave = () => {
     if (editedNumber.trim() && editedLabel.trim()) {
-      editPhoneNumber(personId!, phoneId, editedNumber.trim(), editedLabel.trim());
-      setIsEditing(false);
+      editPhoneNumber(personId, phone.id, editedNumber.trim(), editedLabel.trim());
+      onClose();
     }
   };
 
   return (
-    <div className="bg-gray-50 rounded-xl p-4 mb-3 group">
-      {isEditing ? (
-        <div className="space-y-2">
-          <input value={editedLabel} onChange={(e) => setEditedLabel(e.target.value)} placeholder="Label" className="w-full bg-white rounded-lg px-3 py-2 text-sm border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500" />
-          <input value={editedNumber} onChange={(e) => setEditedNumber(e.target.value)} placeholder="Phone number" className="w-full bg-white rounded-lg px-3 py-2 text-sm border border-gray-200 outline-none focus:ring-2 focus:ring-blue-500" />
-          <div className="flex gap-2">
-            <button onClick={handleSave} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-2 rounded-lg text-sm transition-colors">Save</button>
-            <button onClick={() => { setIsEditing(false); setEditedNumber(number); setEditedLabel(label); }} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-2 rounded-lg text-sm transition-colors">Cancel</button>
+    <Dialog open onOpenChange={onClose}>
+      <DialogContent>
+        <DialogHeader><DialogTitle>Edit Phone Number</DialogTitle></DialogHeader>
+        <div className="space-y-3 mt-2">
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Label</label>
+            <input
+              value={editedLabel}
+              onChange={(e) => setEditedLabel(e.target.value)}
+              placeholder="Label (e.g. Mobile)"
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-gray-500 mb-1">Phone Number</label>
+            <input
+              value={editedNumber}
+              onChange={(e) => setEditedNumber(e.target.value)}
+              placeholder="Phone number"
+              type="tel"
+              autoFocus
+              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2.5 text-sm text-gray-900 outline-none focus:ring-2 focus:ring-blue-500"
+            />
+          </div>
+          <div className="flex gap-2 pt-1">
+            <button onClick={onClose} className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 font-semibold py-3 rounded-xl transition-colors">Cancel</button>
+            <button onClick={handleSave} className="flex-1 bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 rounded-xl transition-colors">Save</button>
           </div>
         </div>
-      ) : (
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
-            <Phone size={16} className="text-blue-500" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900">{number}</p>
-            <p className="text-xs text-gray-500">{label}</p>
-          </div>
-          <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button onClick={() => { setIsEditing(true); setEditedNumber(number); setEditedLabel(label); }} className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors">
-              <Pencil size={14} />
-            </button>
-            <button onClick={onDelete} className="p-1.5 bg-red-100 hover:bg-red-200 text-red-500 rounded-lg transition-colors">
-              <Trash2 size={14} />
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 }
 
@@ -138,6 +129,7 @@ export default function PersonDetailPage() {
 
   const [deleteNoteId, setDeleteNoteId] = useState<string | null>(null);
   const [deletePhoneId, setDeletePhoneId] = useState<string | null>(null);
+  const [editingPhone, setEditingPhone] = useState<PhoneNumber | null>(null);
 
   const person = people.find((p) => p.id === personId);
 
@@ -190,13 +182,31 @@ export default function PersonDetailPage() {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Phone Numbers</p>
               </div>
               {person.phoneNumbers.map((phone) => (
-                <PhoneCard
-                  key={phone.id}
-                  phoneId={phone.id}
-                  number={phone.number}
-                  label={phone.label}
-                  onDelete={() => setDeletePhoneId(phone.id)}
-                />
+                <div key={phone.id} className="bg-gray-50 rounded-xl p-4 mb-3">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <Phone size={16} className="text-blue-500" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-gray-900">{phone.number}</p>
+                      <p className="text-xs text-gray-500">{phone.label}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <button
+                        onClick={() => setEditingPhone(phone)}
+                        className="p-1.5 bg-blue-100 hover:bg-blue-200 text-blue-600 rounded-lg transition-colors"
+                      >
+                        <Pencil size={14} />
+                      </button>
+                      <button
+                        onClick={() => setDeletePhoneId(phone.id)}
+                        className="p-1.5 bg-red-100 hover:bg-red-200 text-red-500 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ))}
             </div>
           )}
@@ -229,6 +239,15 @@ export default function PersonDetailPage() {
           )}
         </div>
       </div>
+
+      {/* Edit Phone Dialog */}
+      {editingPhone !== null && (
+        <EditPhoneDialog
+          phone={editingPhone}
+          personId={personId!}
+          onClose={() => setEditingPhone(null)}
+        />
+      )}
 
       {/* Delete Note Confirm */}
       <Dialog open={!!deleteNoteId} onOpenChange={() => setDeleteNoteId(null)}>
