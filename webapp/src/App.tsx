@@ -11,6 +11,11 @@ import EditGroupPage from "./pages/EditGroupPage";
 import DeletedGroupsPage from "./pages/DeletedGroupsPage";
 import NotFound from "./pages/NotFound";
 
+// Disable browser scroll restoration so we control scroll position on navigation
+if ("scrollRestoration" in window.history) {
+  window.history.scrollRestoration = "manual";
+}
+
 const queryClient = new QueryClient();
 
 const App = () => (
