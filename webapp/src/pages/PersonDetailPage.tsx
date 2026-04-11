@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { ArrowLeft, Pencil, Trash2, Phone, FileText, Plus } from "lucide-react";
 import { useAppStore } from "../state/appStore";
@@ -79,6 +79,13 @@ function PhoneCard({
   const [editedNumber, setEditedNumber] = useState(number);
   const [editedLabel, setEditedLabel] = useState(label);
   const editPhoneNumber = useAppStore((s) => s.editPhoneNumber);
+
+  useEffect(() => {
+    if (!isEditing) {
+      setEditedNumber(number);
+      setEditedLabel(label);
+    }
+  }, [number, label]);
   const { personId } = useParams<{ personId: string }>();
 
   const handleSave = () => {
